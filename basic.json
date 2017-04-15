@@ -1,0 +1,69 @@
+
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Cloud Formation template",
+    "Metadata": {
+
+    },
+    "Parameters": {
+    
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+        
+        "s3Bucket": {
+            "Type": "AWS::S3::Bucket"
+        },
+        
+        "VPC": {
+          "Type": "AWS::EC2::VPC",
+          "Properties": {
+            "CidrBlock": "172.16.0.0/16",
+            "Tags": [ { "Key": "Name", "Value":  "CloudFormation VPC" } ]
+          }
+        },
+
+        
+        "subnetA": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+            "AvailabilityZone": {
+                "Fn::Select" : [ "0" ,{ "Fn::GetAZs": ""} ]
+             },
+            "VpcId": {"Ref": "VPC"},
+            "CidrBlock": "172.16.0.0/24"
+          }
+        }, 
+
+        
+        "opsworksStack": {
+          "Type": "AWS::OpsWorks::Stack",
+          "Properties": {
+            "Name": "FirstOpsworksStack",
+            "DefaultAvailabilityZone": {
+                "Fn::Select" : [ "0" ,{ "Fn::GetAZs": ""} ]
+            },
+            "DefaultOs": "Linux",
+            "DefaultSshKeyName": "us-east-key",
+            "DefaultSubnetId": {"Ref": "subnetA"},
+            "UseCustomCookbooks": "false",
+            "UseOpsworksSecurityGroups": "true",
+            "VpcId": {"Ref": "VPC"} 
+          }
+        }
+        
+
+    },
+    "Outputs": {
+        "BucketName":{
+            "Value": {"Ref": "s3Bucket"}
+        }
+
+    }
+}
+    
